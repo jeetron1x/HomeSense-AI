@@ -1,0 +1,8 @@
+{
+	"appId": "ai.homesense.app",
+	"appName": "HomeSense AI",
+	"webDir": "dist",
+	"server": {
+		"androidScheme": "https"
+	}
+}

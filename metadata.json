@@ -1,0 +1,11 @@
+{
+  "name": "HomeSense AI",
+  "description": "Privacy-first on-device ambient living auditor. Real-time acoustic anomaly detection, visual BEE star rating scanner, and utility power optimization.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
