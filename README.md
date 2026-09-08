@@ -5,7 +5,8 @@
 # ⚡ HomeSense AI
 ### Edge-First Intelligent Home Energy Auditing & Acoustic Hazard Anomaly Detection
 
-[![Android Universal](https://img.shields.io/badge/Android-Universal%20(API%2024--34)-3DDC84?style=for-the-badge&logo=android&logoColor=white)](#-universal-android-apk-packaging)
+[![Latest Release](https://img.shields.io/github/v/release/jeetron1x/HomeSense-AI?style=for-the-badge&color=00F5FF&logo=github)](https://github.com/jeetron1x/HomeSense-AI/releases/tag/v1.0.0)
+[![Download APK](https://img.shields.io/badge/Download-Universal%20APK%20(v1.0.0)-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/jeetron1x/HomeSense-AI/releases/download/v1.0.0/HomeSense-AI-Universal.apk)
 [![APK Signature](https://img.shields.io/badge/APK%20Signing-Scheme%20v2%20%2B%20v3-00F5FF?style=for-the-badge&logo=security&logoColor=black)](#-universal-android-apk-packaging)
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI%20%26%20Uvicorn-009688?style=for-the-badge&logo=fastapi&logoColor=white)](#-python-backend--ml-engine)
 [![Edge ML](https://img.shields.io/badge/On--Device%20ML-100%25%20Offline%20DSP-10B981?style=for-the-badge&logo=tensorflow&logoColor=white)](#-on-device-audio-ml-pipeline)
@@ -14,7 +15,7 @@
 
 <br/>
 
-[🚀 **Open Interactive Web Showcase** (Live Audio Simulator & Calculator)](showcase.html) • [📱 **Install Universal APK**](#-android-installation--sideloading-guide) • [⚡ **System Architecture**](#-system-architecture) • [🛠️ **Quick Start**](#-quick-start)
+[🚀 **Open Interactive Web Showcase** (Live Audio Simulator & Calculator)](showcase.html) • [📲 **Download Universal APK (v1.0.0)**](https://github.com/jeetron1x/HomeSense-AI/releases/download/v1.0.0/HomeSense-AI-Universal.apk) • [⚡ **System Architecture**](#-system-architecture) • [🛠️ **Quick Start**](#-quick-start)
 
 </div>
 
@@ -158,8 +159,8 @@ To install HomeSense AI on any Android smartphone:
 
 1. **Uninstall any previous version**:
    > If an older debug build was previously installed, you must **uninstall** it first so Android accepts the new release signature.
-2. **Transfer the APK**:
-   > Copy `HomeSense-AI-Universal.apk` to your phone via USB, Google Drive, WhatsApp, or Telegram.
+2. **Download the Release APK**:
+   > Download 📲 **[HomeSense-AI-Universal.apk](https://github.com/jeetron1x/HomeSense-AI/releases/download/v1.0.0/HomeSense-AI-Universal.apk)** directly from the official [v1.0.0 Release](https://github.com/jeetron1x/HomeSense-AI/releases/tag/v1.0.0).
 3. **Allow Installation from Source**:
    > When opening the file, tap **Settings** if prompted and toggle on **"Allow from this source"**.
 4. **Install**:
