@@ -31,26 +31,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   const isLight = theme === 'light';
 
-  const handleQuickLogin = (presetEmail: string, name: string) => {
-    triggerHaptic('success');
-    const user: UserAccount = {
-      id: presetEmail.toLowerCase().replace(/[^a-z0-9]/g, '-'),
-      email: presetEmail,
-      displayName: name,
-      address: 'Skyline Residences, Flat 402, Bangalore',
-      propertyName: 'Skyline Residences',
-      propertyUnit: 'Flat 402',
-      meshNodeId: 'Mesh-042',
-      tier: 'Pro Sense',
-      avatarInitials: name.slice(0, 2).toUpperCase(),
-      joinedDate: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
-    };
-
-    onLogin(user);
-    onShowToast(`✓ Signed in as ${user.displayName}`);
-    onClose();
-  };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || !email.includes('@')) {
@@ -144,39 +124,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
         {/* Form Body */}
         <div className="p-5 overflow-y-auto space-y-4 flex-1">
-          {/* Quick One-Tap Login */}
-          <div className={`p-3.5 rounded-2xl border space-y-2 ${
-            isLight ? 'bg-slate-50 border-slate-200 text-slate-900' : 'bg-[#0a0d14] border-slate-800 text-slate-100'
-          }`}>
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-cyan-500 font-code-spec uppercase tracking-wider">
-                Instant 1-Tap Access
-              </span>
-              <span className="text-[10px] text-slate-400 font-medium">Team Invincibles</span>
-            </div>
-            <p className="text-xs text-slate-400 leading-snug">
-              Sign in directly with your developer account or enter credentials below:
-            </p>
-            <div className="grid grid-cols-1 gap-2 pt-1">
-              <button
-                type="button"
-                onClick={() => handleQuickLogin('technojeet105520@gmail.com', 'Jeet')}
-                className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md active:scale-98 transition-all"
-              >
-                <span className="material-symbols-outlined text-[16px]">account_circle</span>
-                <span>Continue as technojeet105520@gmail.com</span>
-              </button>
-            </div>
-          </div>
-
-          <div className="relative flex py-1 items-center">
-            <div className={`grow border-t ${isLight ? 'border-slate-200' : 'border-slate-800'}`} />
-            <span className="shrink mx-3 text-xs text-slate-400 font-code-spec uppercase">
-              Or Credentials
-            </span>
-            <div className={`grow border-t ${isLight ? 'border-slate-200' : 'border-slate-800'}`} />
-          </div>
-
           <form onSubmit={handleSubmit} className="space-y-3.5">
             {isRegister && (
               <>

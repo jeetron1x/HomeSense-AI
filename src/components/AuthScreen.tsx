@@ -108,25 +108,6 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
     }, 450);
   };
 
-  const handleQuickDemoAccess = () => {
-    triggerHaptic('tap');
-    const demoUser: UserAccount = {
-      id: 'user-demo-smart-living',
-      email: 'technojeet105520@gmail.com',
-      displayName: 'Jeet (Team Invincibles)',
-      address: 'Skyline Luxury Residences, Sector 45',
-      propertyName: 'Skyline Residences',
-      propertyUnit: 'Tower B - 402',
-      meshNodeId: 'Node-402',
-      tier: 'Pro Sense',
-      avatarInitials: 'TJ',
-      joinedDate: 'Sep 2026',
-    };
-    triggerHaptic('success');
-    onLogin(demoUser);
-    onShowToast('✓ Authenticated as Developer Demo Account');
-  };
-
   return (
     <div
       className={`min-h-screen w-full flex flex-col items-center justify-center p-4 sm:p-6 transition-colors duration-300 relative ${
@@ -414,34 +395,6 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
               )}
             </button>
           </form>
-
-          {/* Developer / Demo Quick Access */}
-          <div className={`mt-5 pt-5 border-t flex flex-col gap-2.5 ${
-            isLight ? 'border-slate-200' : 'border-slate-800'
-          }`}>
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] uppercase font-bold text-slate-400 font-code-spec">
-                Developer Fast Access
-              </span>
-              <span className={`text-[9px] px-1.5 py-0.5 rounded font-code-spec font-bold ${
-                isLight ? 'bg-cyan-50 text-cyan-700' : 'bg-slate-800 text-cyan-400'
-              }`}>
-                TEAM INVINCIBLES
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={handleQuickDemoAccess}
-              className={`w-full py-2.5 px-3 rounded-xl font-semibold text-xs flex items-center justify-center gap-2 border transition-all active:scale-[0.98] ${
-                isLight
-                  ? 'bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-200'
-                  : 'bg-slate-900 hover:bg-slate-800 text-slate-200 border-slate-800'
-              }`}
-            >
-              <span className="material-symbols-outlined text-[16px] text-cyan-400">badge</span>
-              <span>Continue with Developer Account (Jeet)</span>
-            </button>
-          </div>
         </div>
 
         {/* Security & Privacy Badge */}
