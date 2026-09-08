@@ -1,0 +1,182 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradients -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#050811" />
+      <stop offset="50%" stop-color="#0A1124" />
+      <stop offset="100%" stop-color="#020408" />
+    </linearGradient>
+
+    <!-- Neon Cyan / Emerald / Purple Gradients -->
+    <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00F5FF" />
+      <stop offset="50%" stop-color="#00D2FF" />
+      <stop offset="100%" stop-color="#0072FF" />
+    </linearGradient>
+    <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#10B981" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+    <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#EF4444" />
+    </linearGradient>
+
+    <filter id="glowCyan" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <filter id="glowCard" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="12" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <!-- Pattern Grid -->
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(0, 245, 255, 0.05)" stroke-width="1"/>
+    </pattern>
+
+    <style>
+      @keyframes pulseGlow {
+        0%, 100% { opacity: 0.3; transform: scale(1); }
+        50% { opacity: 0.7; transform: scale(1.08); }
+      }
+      @keyframes floatParticle {
+        0% { transform: translateY(0px) translateX(0px); opacity: 0.2; }
+        50% { transform: translateY(-15px) translateX(8px); opacity: 0.8; }
+        100% { transform: translateY(0px) translateX(0px); opacity: 0.2; }
+      }
+      @keyframes waveBar1 { 0%, 100% { height: 16px; y: 192px; } 50% { height: 56px; y: 172px; } }
+      @keyframes waveBar2 { 0%, 100% { height: 32px; y: 184px; } 50% { height: 80px; y: 160px; } }
+      @keyframes waveBar3 { 0%, 100% { height: 48px; y: 176px; } 50% { height: 24px; y: 188px; } }
+      @keyframes waveBar4 { 0%, 100% { height: 64px; y: 168px; } 50% { height: 96px; y: 152px; } }
+      @keyframes waveBar5 { 0%, 100% { height: 28px; y: 186px; } 50% { height: 72px; y: 164px; } }
+      @keyframes radarSweep {
+        0% { stroke-dashoffset: 0; }
+        100% { stroke-dashoffset: 360; }
+      }
+
+      .pulse-circle {
+        transform-origin: 1020px 200px;
+        animation: pulseGlow 4s ease-in-out infinite;
+      }
+      .particle-1 { animation: floatParticle 5s ease-in-out infinite; }
+      .particle-2 { animation: floatParticle 7s ease-in-out infinite reverse; }
+      
+      .wb-1 { animation: waveBar1 1.2s ease-in-out infinite; }
+      .wb-2 { animation: waveBar2 1.4s ease-in-out infinite 0.1s; }
+      .wb-3 { animation: waveBar3 1.1s ease-in-out infinite 0.3s; }
+      .wb-4 { animation: waveBar4 1.5s ease-in-out infinite 0.2s; }
+      .wb-5 { animation: waveBar5 1.3s ease-in-out infinite 0.4s; }
+    </style>
+  </defs>
+
+  <!-- Background Base -->
+  <rect width="1200" height="420" rx="16" fill="url(#bgGrad)" />
+  <rect width="1200" height="420" rx="16" fill="url(#grid)" />
+
+  <!-- Ambient Light Orbs -->
+  <circle class="pulse-circle" cx="1020" cy="210" r="140" fill="rgba(0, 245, 255, 0.08)" filter="url(#glowCyan)" />
+  <circle cx="180" cy="80" r="160" fill="rgba(16, 185, 129, 0.05)" />
+  <circle cx="650" cy="380" r="120" fill="rgba(0, 114, 255, 0.06)" />
+
+  <!-- Floating Particles -->
+  <circle class="particle-1" cx="320" cy="90" r="3" fill="#00F5FF" />
+  <circle class="particle-2" cx="780" cy="70" r="2.5" fill="#10B981" />
+  <circle class="particle-1" cx="890" cy="310" r="3.5" fill="#00F5FF" />
+  <circle class="particle-2" cx="150" cy="320" r="2" fill="#F59E0B" />
+
+  <!-- Left / Center Main Content -->
+  <!-- Top Badge -->
+  <g transform="translate(80, 55)">
+    <rect width="260" height="32" rx="16" fill="rgba(0, 245, 255, 0.1)" stroke="rgba(0, 245, 255, 0.3)" stroke-width="1" />
+    <circle cx="18" cy="16" r="5" fill="#00F5FF" filter="url(#glowCyan)" />
+    <text x="32" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#00F5FF" letter-spacing="1.5">INTELLIGENT EDGE ECOSYSTEM</text>
+  </g>
+
+  <!-- Title: HomeSense AI -->
+  <g transform="translate(80, 130)">
+    <text x="0" y="30" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="52" font-weight="900" fill="#FFFFFF" letter-spacing="-1">
+      HomeSense <tspan fill="url(#cyanGrad)">AI</tspan>
+    </text>
+    <text x="0" y="70" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="18" font-weight="400" fill="#94A3B8" letter-spacing="0.2">
+      Edge-First Acoustic Anomaly ML • Real-Time Energy Vision • Universal Android App
+    </text>
+  </g>
+
+  <!-- Live Feature Chips -->
+  <g transform="translate(80, 240)">
+    <!-- Chip 1: Audio ML -->
+    <g transform="translate(0, 0)">
+      <rect width="180" height="42" rx="10" fill="rgba(15, 23, 42, 0.8)" stroke="rgba(0, 245, 255, 0.4)" stroke-width="1.2" />
+      <circle cx="22" cy="21" r="5" fill="#00F5FF" />
+      <text x="36" y="26" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="600" fill="#E2E8F0">Audio ML Pipeline</text>
+    </g>
+
+    <!-- Chip 2: Appliance Vision -->
+    <g transform="translate(195, 0)">
+      <rect width="180" height="42" rx="10" fill="rgba(15, 23, 42, 0.8)" stroke="rgba(16, 185, 129, 0.4)" stroke-width="1.2" />
+      <circle cx="22" cy="21" r="5" fill="#10B981" />
+      <text x="36" y="26" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="600" fill="#E2E8F0">Appliance Vision</text>
+    </g>
+
+    <!-- Chip 3: 100% Offline Edge -->
+    <g transform="translate(390, 0)">
+      <rect width="165" height="42" rx="10" fill="rgba(15, 23, 42, 0.8)" stroke="rgba(245, 158, 11, 0.4)" stroke-width="1.2" />
+      <circle cx="22" cy="21" r="5" fill="#F59E0B" />
+      <text x="36" y="26" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="600" fill="#E2E8F0">100% Offline Edge</text>
+    </g>
+
+    <!-- Chip 4: Android Universal -->
+    <g transform="translate(570, 0)">
+      <rect width="185" height="42" rx="10" fill="rgba(15, 23, 42, 0.8)" stroke="rgba(168, 85, 247, 0.4)" stroke-width="1.2" />
+      <circle cx="22" cy="21" r="5" fill="#A855F7" />
+      <text x="36" y="26" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="600" fill="#E2E8F0">Android 7.0–15+ (v2/v3)</text>
+    </g>
+  </g>
+
+  <!-- Bottom Spec Status Bar -->
+  <g transform="translate(80, 320)">
+    <line x1="0" y1="0" x2="675" y2="0" stroke="rgba(255, 255, 255, 0.1)" stroke-width="1" />
+    <text x="0" y="25" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="500" fill="#64748B">
+      <tspan fill="#00F5FF">Target SDK 34</tspan> • Min SDK 24 • FastAPI Backend • Capacitor 8 • React 18 • TypeScript • ONNX / YAMNet
+    </text>
+  </g>
+
+  <!-- Right Visual Hologram Display (Interactive Radar / Audio Waveform Monitor) -->
+  <g transform="translate(860, 50)">
+    <!-- Outer Card Frame -->
+    <rect width="260" height="320" rx="18" fill="rgba(10, 18, 36, 0.7)" stroke="rgba(0, 245, 255, 0.25)" stroke-width="1.5" />
+    
+    <!-- Top Radar Header -->
+    <text x="24" y="34" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="700" fill="#00F5FF" letter-spacing="1">ACOUSTIC SENSOR SPECTRUM</text>
+    <circle cx="236" cy="30" r="4" fill="#10B981" filter="url(#glowCyan)" />
+
+    <!-- Circular Radar Reticle -->
+    <circle cx="130" cy="115" r="55" fill="none" stroke="rgba(0, 245, 255, 0.15)" stroke-width="1.5" />
+    <circle cx="130" cy="115" r="35" fill="none" stroke="rgba(0, 245, 255, 0.25)" stroke-dasharray="3,3" stroke-width="1" />
+    <circle cx="130" cy="115" r="16" fill="rgba(0, 245, 255, 0.1)" stroke="#00F5FF" stroke-width="1.5" />
+    <line x1="130" y1="50" x2="130" y2="180" stroke="rgba(0, 245, 255, 0.1)" stroke-width="1" />
+    <line x1="65" y1="115" x2="195" y2="115" stroke="rgba(0, 245, 255, 0.1)" stroke-width="1" />
+
+    <!-- Animated Real-time Waveform Bars -->
+    <g transform="translate(30, 0)">
+      <rect class="wb-1" x="10" y="192" width="10" height="16" rx="4" fill="#00F5FF" opacity="0.9" />
+      <rect class="wb-2" x="28" y="184" width="10" height="32" rx="4" fill="#00D2FF" opacity="0.9" />
+      <rect class="wb-4" x="46" y="168" width="10" height="64" rx="4" fill="#10B981" opacity="0.9" />
+      <rect class="wb-3" x="64" y="176" width="10" height="48" rx="4" fill="#00F5FF" opacity="0.9" />
+      <rect class="wb-5" x="82" y="186" width="10" height="28" rx="4" fill="#3B82F6" opacity="0.9" />
+      <rect class="wb-2" x="100" y="184" width="10" height="32" rx="4" fill="#00F5FF" opacity="0.9" />
+      <rect class="wb-4" x="118" y="168" width="10" height="64" rx="4" fill="#F59E0B" opacity="0.9" />
+      <rect class="wb-1" x="136" y="192" width="10" height="16" rx="4" fill="#00F5FF" opacity="0.9" />
+      <rect class="wb-3" x="154" y="176" width="10" height="48" rx="4" fill="#10B981" opacity="0.9" />
+      <rect class="wb-5" x="172" y="186" width="10" height="28" rx="4" fill="#00D2FF" opacity="0.9" />
+    </g>
+
+    <!-- Bottom Readout Box -->
+    <rect x="20" y="245" width="220" height="55" rx="8" fill="rgba(15, 23, 42, 0.9)" stroke="rgba(255, 255, 255, 0.08)" />
+    <text x="32" y="267" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="600" fill="#64748B">STATE CLASSIFICATION</text>
+    <text x="32" y="287" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="800" fill="#10B981">NORMAL AMBIENT (98.4%)</text>
+  </g>
+</svg>

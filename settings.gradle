@@ -1,0 +1,31 @@
+rootProject.name = "HomeSense AI"
+
+include ':app'
+project(':app').projectDir = new File('./android/app')
+
+include ':capacitor-cordova-android-plugins'
+project(':capacitor-cordova-android-plugins').projectDir = new File('./android/capacitor-cordova-android-plugins')
+
+include ':capacitor-android'
+project(':capacitor-android').projectDir = new File('./node_modules/@capacitor/android/capacitor')
+
+include ':capacitor-camera'
+project(':capacitor-camera').projectDir = new File('./node_modules/@capacitor/camera/android')
+
+// Dynamically auto-include any other plugins from android/capacitor.settings.gradle
+File capSettings = new File(rootDir, 'android/capacitor.settings.gradle')
+if (capSettings.exists()) {
+    capSettings.eachLine { line ->
+        def includeMatch = line =~ /include\s+['"](:[^'"]+)['"]/
+        if (includeMatch) {
+            def projName = includeMatch[0][1]
+            include projName
+        }
+        def dirMatch = line =~ /project\(['"](:[^'"]+)['"]\)\.projectDir\s*=\s*new File\(['"]\.\.\/([^'"]+)['"]\)/
+        if (dirMatch) {
+            def projName = dirMatch[0][1]
+            def relPath = dirMatch[0][2]
+            project(projName).projectDir = new File(rootDir, relPath)
+        }
+    }
+}

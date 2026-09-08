@@ -1,6 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Capacitor } from '@capacitor/core';
 import { AcousticTelemetry, ThemeMode } from '../types.ts';
 import { triggerHaptic } from '../utils/haptics.ts';
+import {
+  HomeSenseOnDeviceAudioAnalyzer,
+  AudioAnalysisPayload,
+  TARGET_EVENTS,
+} from '../services/audioAnalyzer.ts';
 
 interface MonitorViewProps {
   onShowToast: (msg: string) => void;
@@ -29,19 +35,64 @@ export const MonitorView: React.FC<MonitorViewProps> = ({
   const micStreamRef = useRef<MediaStream | null>(null);
   const animFrameRef = useRef<number | null>(null);
   const phaseRef = useRef<number>(0);
+  const lastAcousticUpdateRef = useRef<number>(0);
+  const lastMotionUpdateRef = useRef<number>(0);
+  const gravityRef = useRef<{ x: number; y: number; z: number }>({ x: 0, y: 9.81, z: 0 });
+
+  // On-Device ML Audio Analyzer Pipeline (integrated from homesenseai.zip)
+  const audioAnalyzerRef = useRef<HomeSenseOnDeviceAudioAnalyzer>(new HomeSenseOnDeviceAudioAnalyzer(48000));
+  const lastMlAnalysisTimeRef = useRef<number>(0);
+  const lastAlertedEventRef = useRef<string>('');
+  const [latestMlAnalysis, setLatestMlAnalysis] = useState<AudioAnalysisPayload>({
+    file_analyzed: 'live_telemetry.wav',
+    duration_seconds: 2.0,
+    rms_energy: 0.008,
+    detected_event: 'Ambient / Quiet',
+    confidence: 0.95,
+    alert_level: 'NORMAL',
+    recommendation: 'Environment quiet. Acoustic baseline nominal.',
+    office_kit_ready: true,
+    source: 'on_device_spectral',
+  });
+
+  const [isMotionSensorActive, setIsMotionSensorActive] = useState<boolean>(false);
 
   const isLight = theme === 'light';
   const isMonitoring = telemetry.status === 'active';
 
-  // Real Hardware Device Motion Sensor (Accelerometer)
+  // Real Hardware Device Motion Sensor (Accelerometer with High-Pass Vibration Filter)
   useEffect(() => {
     const handleDeviceMotion = (event: DeviceMotionEvent) => {
-      const accel = event.accelerationIncludingGravity || event.acceleration;
+      setIsMotionSensorActive(true);
+      const now = performance.now();
+      if (now - lastMotionUpdateRef.current < 100) return; // 10Hz throttle to keep UI silky smooth
+      lastMotionUpdateRef.current = now;
+
+      const accel = event.acceleration || event.accelerationIncludingGravity;
       if (accel && accel.x !== null && accel.y !== null && accel.z !== null) {
-        const magnitude = Math.sqrt(accel.x * accel.x + accel.y * accel.y + accel.z * accel.z);
-        // Normalize against standard gravity 9.81 m/s²
-        const gForce = Math.abs(magnitude - 9.81) / 9.81;
-        const clampedG = Number(Math.min(1.5, Math.max(0.01, gForce)).toFixed(3));
+        let vibG = 0;
+        if (event.acceleration && event.acceleration.x !== null) {
+          // Direct linear acceleration (gravity-free)
+          const ax = event.acceleration.x || 0;
+          const ay = event.acceleration.y || 0;
+          const az = event.acceleration.z || 0;
+          const mag = Math.sqrt(ax * ax + ay * ay + az * az);
+          vibG = mag / 9.81;
+        } else {
+          // High-pass filter to isolate mechanical vibration from 1G gravitational bias
+          const alpha = 0.82;
+          gravityRef.current.x = alpha * gravityRef.current.x + (1 - alpha) * (accel.x || 0);
+          gravityRef.current.y = alpha * gravityRef.current.y + (1 - alpha) * (accel.y || 0);
+          gravityRef.current.z = alpha * gravityRef.current.z + (1 - alpha) * (accel.z || 0);
+
+          const lx = (accel.x || 0) - gravityRef.current.x;
+          const ly = (accel.y || 0) - gravityRef.current.y;
+          const lz = (accel.z || 0) - gravityRef.current.z;
+          const mag = Math.sqrt(lx * lx + ly * ly + lz * lz);
+          vibG = mag / 9.81;
+        }
+
+        const clampedG = Number(Math.min(1.5, Math.max(0.01, vibG)).toFixed(3));
         onUpdateTelemetry({ vibrationIndexG: clampedG });
 
         if (clampedG > 0.15 && !activeAnomaly) {
@@ -78,26 +129,49 @@ export const MonitorView: React.FC<MonitorViewProps> = ({
       onShowToast('Microphone stream closed • Returned to calibrated DSP synthesis');
     } else {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+        if (Capacitor.isNativePlatform()) {
+          try {
+            await (Capacitor as any).Plugins?.BeeVision?.requestAudioPermission();
+          } catch (pErr) {
+            console.warn('Native permission check:', pErr);
+          }
+        }
+
+        let stream: MediaStream;
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+              echoCancellation: false,
+              noiseSuppression: false,
+              autoGainControl: false,
+            },
+          });
+        } catch {
+          stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        }
+
         micStreamRef.current = stream;
         const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
         const ctx = new AudioContextClass();
+        if (ctx.state === 'suspended') {
+          await ctx.resume();
+        }
         audioContextRef.current = ctx;
 
         const source = ctx.createMediaStreamSource(stream);
         const analyser = ctx.createAnalyser();
         analyser.fftSize = 512;
-        analyser.smoothingTimeConstant = 0.8;
+        analyser.smoothingTimeConstant = 0.65;
         source.connect(analyser);
         analyserRef.current = analyser;
 
         setIsMicStreamActive(true);
         triggerHaptic('success');
         onShowToast('✓ Real-Time Acoustic Microphone Sensor Connected (48kHz FFT)');
-      } catch (err) {
+      } catch (err: any) {
         console.warn('Microphone permission error:', err);
         triggerHaptic('warning');
-        onShowToast('Microphone permission denied. Continuing on high-precision DSP model.');
+        onShowToast(`Microphone: ${err?.name || 'Error'} - ${err?.message || 'Permission denied'}`);
       }
     }
   };
@@ -113,10 +187,32 @@ export const MonitorView: React.FC<MonitorViewProps> = ({
 
     const updateLoop = () => {
       if (isMicStreamActive && analyserRef.current && audioContextRef.current) {
-        // Read real audio sensor data from hardware microphone
+        if (audioContextRef.current.state === 'suspended') {
+          audioContextRef.current.resume().catch(() => {});
+        }
+
+        // 1. TIME-DOMAIN DATA: Genuine physical sound pressure wave from device microphone sensor
+        const timeData = new Uint8Array(analyserRef.current.fftSize);
+        analyserRef.current.getByteTimeDomainData(timeData);
+
+        const points = 68;
+        const stepX = 340 / (points - 1);
+        const dataStep = Math.floor(timeData.length / points);
+        let path = '';
+
+        for (let i = 0; i < points; i++) {
+          const idx = Math.min(i * dataStep, timeData.length - 1);
+          // timeData[idx] ranges 0..255, 128 is center
+          const normalized = (timeData[idx] - 128) / 128;
+          const x = i * stepX;
+          const y = 70 - normalized * 55;
+          path += i === 0 ? `M ${x.toFixed(1)} ${y.toFixed(1)}` : ` L ${x.toFixed(1)} ${y.toFixed(1)}`;
+        }
+        setCurveD(path);
+
+        // 2. FREQUENCY-DOMAIN DATA: Live FFT frequency analysis
         analyserRef.current.getByteFrequencyData(dataArray);
 
-        // Find real peak frequency bin
         let maxVal = 0;
         let peakIndex = 0;
         let totalVal = 0;
@@ -132,45 +228,76 @@ export const MonitorView: React.FC<MonitorViewProps> = ({
 
         const nyquist = audioContextRef.current.sampleRate / 2;
         const binHz = nyquist / dataArray.length;
-        const peakHz = Math.round(peakIndex * binHz) || 440;
+        const peakHz = maxVal > 20 ? Math.round(peakIndex * binHz) : 842;
         const avgVal = totalVal / dataArray.length;
-        const dbApprox = Math.round(-70 + (avgVal / 255) * 60);
+        const dbApprox = Math.round(-80 + (avgVal / 255) * 70);
         setLiveDbLevel(dbApprox);
 
         // Signal to noise ratio approx
         const snr = Math.max(12, Math.min(115, Math.round(45 + (maxVal - avgVal) * 0.4)));
 
-        onUpdateTelemetry({
-          peakFrequencyHz: peakHz,
-          noiseFloorDbfs: dbApprox,
-          snrDb: snr,
-        });
+        // Throttle React telemetry state update to 10Hz (every 100ms) to maintain 60FPS fluid SVG rendering
+        const now = performance.now();
+        if (now - lastAcousticUpdateRef.current > 100) {
+          lastAcousticUpdateRef.current = now;
+          onUpdateTelemetry({
+            peakFrequencyHz: peakHz,
+            noiseFloorDbfs: dbApprox,
+            snrDb: snr,
+          });
+        }
+
+        // Live On-Device ML Audio Classification (HomeSenseAudioAnalyzer pipeline)
+        if (now - lastMlAnalysisTimeRef.current > 650) {
+          lastMlAnalysisTimeRef.current = now;
+          const floatData = new Float32Array(analyserRef.current.fftSize);
+          if ('getFloatTimeDomainData' in analyserRef.current) {
+            analyserRef.current.getFloatTimeDomainData(floatData);
+          } else {
+            for (let i = 0; i < timeData.length; i++) {
+              floatData[i] = (timeData[i] - 128) / 128;
+            }
+          }
+
+          const analysis = audioAnalyzerRef.current.analyzeSamples(
+            floatData,
+            audioContextRef.current.sampleRate
+          );
+          setLatestMlAnalysis(analysis);
+
+          if (analysis.alert_level === 'CRITICAL' || analysis.alert_level === 'WARNING') {
+            if (analysis.detected_event !== lastAlertedEventRef.current) {
+              lastAlertedEventRef.current = analysis.detected_event;
+              triggerHaptic(analysis.alert_level === 'CRITICAL' ? 'warning' : 'tick');
+              onTriggerAnomalyAlert(analysis.detected_event);
+              onShowToast(`🚨 ML Flagged: ${analysis.detected_event} (${analysis.alert_level})`);
+            }
+          }
+        }
 
         // 10-band spectrum bars from real mic data
         const bandStep = Math.floor(dataArray.length / 10);
         const newHeights = Array.from({ length: 10 }, (_, idx) => {
           const sample = dataArray[idx * bandStep] || 0;
-          return Math.max(12, Math.round((sample / 255) * 98));
+          return Math.max(8, Math.round((sample / 255) * 98));
         });
         setBarHeights(newHeights);
-
-        // SVG oscilloscope waveform
-        phaseRef.current += 0.08;
-        const p = phaseRef.current;
-        const amp = (maxVal / 255) * 35;
-        const cD = `M 0 70 Q 30 ${70 - Math.sin(p) * amp}, 60 70 T 120 ${70 + Math.cos(p * 1.2) * amp} T 180 ${70 - Math.sin(p * 1.5) * amp} T 240 ${70 + Math.cos(p * 0.8) * amp} T 300 70 T 340 70`;
-        setCurveD(cD);
       } else {
-        // High-precision calibrated DSP mathematical synthesis
-        phaseRef.current += 0.05;
+        // High-precision calibrated DSP multi-harmonic motor synthesis (Grid 50Hz + mechanical harmonics)
+        phaseRef.current += 0.06;
         const p = phaseRef.current;
+        const points = 68;
+        const stepX = 340 / (points - 1);
+        let path = '';
 
-        const p1 = Math.sin(p) * 14 + 65;
-        const p2 = Math.cos(p * 1.3) * 18 + 55;
-        const p3 = Math.sin(p * 1.7) * 12 + 45;
-        const p4 = Math.cos(p * 0.9) * 16 + 65;
-
-        setCurveD(`M 0 70 Q 30 65, 60 ${p1.toFixed(1)} T 120 ${p2.toFixed(1)} T 180 ${p3.toFixed(1)} T 240 ${p4.toFixed(1)} T 300 68 T 340 70`);
+        for (let i = 0; i < points; i++) {
+          const x = i * stepX;
+          const rad = (i / points) * Math.PI * 4 + p;
+          // Multi-harmonic motor formula: Fundamental + 3rd harmonic + 5th harmonic
+          const y = 70 - (Math.sin(rad) * 24 + Math.sin(rad * 3) * 8 + Math.sin(rad * 5) * 4);
+          path += i === 0 ? `M ${x.toFixed(1)} ${y.toFixed(1)}` : ` L ${x.toFixed(1)} ${y.toFixed(1)}`;
+        }
+        setCurveD(path);
 
         const syntheticHeights = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => {
           const h = Math.min(96, Math.max(14, Math.sin(p + i * 0.7) * 35 + 50));
@@ -201,6 +328,39 @@ export const MonitorView: React.FC<MonitorViewProps> = ({
     };
   }, []);
 
+  const handleSimulateTargetEvent = (type: 'alarm' | 'water' | 'appliance' | 'ambient') => {
+    triggerHaptic('tap');
+    const simulatedSignal = audioAnalyzerRef.current.generateSimulatedSignal(type);
+    const analysis = audioAnalyzerRef.current.analyzeSamples(simulatedSignal, 16000);
+    setLatestMlAnalysis(analysis);
+    lastAlertedEventRef.current = analysis.detected_event;
+
+    if (type === 'alarm') {
+      setActiveAnomaly('Smoke/Fire Alarm Beep');
+      onUpdateTelemetry({ peakFrequencyHz: 3000, vibrationIndexG: 0.08 });
+      onTriggerAnomalyAlert('Smoke/Fire Alarm Beep (+₹120 hazard alert)');
+      onShowToast('🚨 CRITICAL: Smoke/Fire Alarm Beep Detected!');
+      triggerHaptic('warning');
+    } else if (type === 'water') {
+      setActiveAnomaly('Continuous Running Water / Leak');
+      onUpdateTelemetry({ peakFrequencyHz: 260, vibrationIndexG: 0.05 });
+      onTriggerAnomalyAlert('Continuous Running Water / Leak (+₹60 leak waste)');
+      onShowToast('⚠️ WARNING: Continuous Running Water / Leak Detected!');
+      triggerHaptic('warning');
+    } else if (type === 'appliance') {
+      setActiveAnomaly('High Appliance Vibrations / Rattling');
+      onUpdateTelemetry({ peakFrequencyHz: 150, vibrationIndexG: 0.22 });
+      onTriggerAnomalyAlert('High Appliance Vibrations / Rattling (+₹85 extra spend)');
+      onShowToast('⚠️ WARNING: High Appliance Mechanical Strain Detected!');
+      triggerHaptic('warning');
+    } else {
+      setActiveAnomaly(null);
+      onUpdateTelemetry({ peakFrequencyHz: 842, vibrationIndexG: 0.01 });
+      onShowToast('Acoustic baseline restored to quiet ambient');
+      triggerHaptic('tick');
+    }
+  };
+
   const handleSimulateAnomaly = (name: string, freq: number, vib: number, cost: number) => {
     triggerHaptic('warning');
     setActiveAnomaly(name);
@@ -215,6 +375,9 @@ export const MonitorView: React.FC<MonitorViewProps> = ({
   const handleResetAcoustic = () => {
     triggerHaptic('tick');
     setActiveAnomaly(null);
+    lastAlertedEventRef.current = '';
+    const baseline = audioAnalyzerRef.current.analyzeSamples(new Float32Array(0));
+    setLatestMlAnalysis(baseline);
     onUpdateTelemetry({
       peakFrequencyHz: 842,
       vibrationIndexG: 0.04,
@@ -245,9 +408,17 @@ export const MonitorView: React.FC<MonitorViewProps> = ({
               }`}
             />
           </span>
-          <span className="text-[10px] font-bold uppercase tracking-wider font-code-spec">
-            {isMicStreamActive ? 'HARDWARE MIC SENSOR ACTIVE' : 'DSP ON-DEVICE SENSE (48kHz)'}
-          </span>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="text-[10px] font-bold uppercase tracking-wider font-code-spec">
+              {isMicStreamActive ? 'MIC: HARDWARE LIVE' : 'MIC: DSP 48kHz'}
+            </span>
+            <span className="text-slate-500 text-[10px]">•</span>
+            <span className={`text-[10px] font-bold uppercase tracking-wider font-code-spec ${
+              isMotionSensorActive ? 'text-emerald-400' : 'text-cyan-400'
+            }`}>
+              {isMotionSensorActive ? 'ACCELEROMETER: LIVE' : 'MOTION: READY'}
+            </span>
+          </div>
         </div>
 
         <button
@@ -424,6 +595,219 @@ export const MonitorView: React.FC<MonitorViewProps> = ({
             <span className="text-[9px] text-cyan-500 font-medium font-code-spec">
               {telemetry.sampleRate}
             </span>
+          </div>
+        </div>
+      </div>
+
+      {/* On-Device Audio ML Classifier Card (from homesenseai.zip HomeSenseAudioAnalyzer) */}
+      <div
+        className={`rounded-3xl p-5 border shadow-2xl space-y-4 transition-all ${
+          isLight
+            ? 'bg-white border-slate-200 text-slate-900 shadow-md'
+            : 'bg-[#0f141f] border-slate-800/90 text-slate-100 shadow-[0_20px_50px_rgba(0,0,0,0.95)]'
+        }`}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div
+              className={`w-9 h-9 rounded-2xl flex items-center justify-center shadow-md ${
+                latestMlAnalysis.alert_level === 'CRITICAL'
+                  ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
+                  : latestMlAnalysis.alert_level === 'WARNING'
+                  ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                  : isLight
+                  ? 'bg-emerald-100 text-emerald-700'
+                  : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+              }`}
+            >
+              <span className="material-symbols-outlined text-[20px]">
+                {latestMlAnalysis.alert_level === 'CRITICAL'
+                  ? 'e911_emergency'
+                  : latestMlAnalysis.alert_level === 'WARNING'
+                  ? 'warning'
+                  : 'graphic_eq'}
+              </span>
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="font-extrabold text-base">On-Device Audio ML</h3>
+                <span
+                  className={`text-[9px] font-bold px-2 py-0.5 rounded-full font-code-spec uppercase ${
+                    latestMlAnalysis.alert_level === 'CRITICAL'
+                      ? 'bg-rose-500/20 text-rose-400 border border-rose-500/40'
+                      : latestMlAnalysis.alert_level === 'WARNING'
+                      ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40'
+                      : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                  }`}
+                >
+                  {latestMlAnalysis.alert_level}
+                </span>
+              </div>
+              <p className="text-xs text-slate-400">
+                HomeSense AudioSet &amp; Spectral Heuristic Engine
+              </p>
+            </div>
+          </div>
+
+          <span
+            className={`text-[10px] font-bold font-code-spec px-2 py-1 rounded-lg border ${
+              isLight
+                ? 'bg-slate-100 text-slate-700 border-slate-200'
+                : 'bg-[#0a0d14] text-cyan-400 border-cyan-500/20'
+            }`}
+          >
+            {Math.round(latestMlAnalysis.confidence * 100)}% CONF
+          </span>
+        </div>
+
+        {/* Live Detected Event Banner */}
+        <div
+          className={`p-3.5 rounded-2xl border transition-all ${
+            latestMlAnalysis.alert_level === 'CRITICAL'
+              ? 'bg-rose-500/10 border-rose-500/30 text-rose-300'
+              : latestMlAnalysis.alert_level === 'WARNING'
+              ? 'bg-amber-500/10 border-amber-500/30 text-amber-300'
+              : isLight
+              ? 'bg-slate-50 border-slate-200 text-slate-800'
+              : 'bg-[#0a0d14] border-slate-800 text-slate-200'
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] uppercase font-bold tracking-wider font-code-spec opacity-70">
+              Active Acoustic Classification
+            </span>
+            <span className="text-[10px] font-bold font-code-spec opacity-80">
+              RMS: {latestMlAnalysis.rms_energy}
+            </span>
+          </div>
+          <div className="text-base font-extrabold mt-1 tracking-tight">
+            {latestMlAnalysis.detected_event}
+          </div>
+          <p className="text-xs mt-1.5 opacity-90 leading-relaxed">
+            {latestMlAnalysis.recommendation}
+          </p>
+        </div>
+
+        {/* Office Kit Ready Badge */}
+        {latestMlAnalysis.office_kit_ready && (
+          <div
+            className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs border font-code-spec ${
+              isLight
+                ? 'bg-cyan-50 border-cyan-200 text-cyan-800'
+                : 'bg-cyan-500/10 border-cyan-500/20 text-cyan-300'
+            }`}
+          >
+            <div className="flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-[16px] text-cyan-400">
+                cloud_sync
+              </span>
+              <span className="font-semibold text-[11px]">
+                Office Kit Workstation Mesh Sync Active
+              </span>
+            </div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">
+              READY
+            </span>
+          </div>
+        )}
+
+        {/* Target Events Quick-Test Triggers */}
+        <div className="space-y-2 pt-1">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold text-slate-400 uppercase font-code-spec">
+              Smart Living Target Validation (AudioSet)
+            </span>
+            {activeAnomaly && (
+              <button
+                type="button"
+                onClick={handleResetAcoustic}
+                className="text-[10px] font-bold text-cyan-500 hover:underline font-code-spec"
+              >
+                Reset Baseline
+              </button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => handleSimulateTargetEvent('alarm')}
+              className={`p-2.5 rounded-xl border text-left flex items-center justify-between transition-all active:scale-95 ${
+                latestMlAnalysis.detected_event === 'Smoke/Fire Alarm Beep'
+                  ? 'bg-rose-500/20 border-rose-500 text-rose-300 font-bold'
+                  : isLight
+                  ? 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-700'
+                  : 'bg-[#0a0d14] hover:bg-slate-900 border-slate-800 text-slate-300'
+              }`}
+            >
+              <div>
+                <p className="text-xs font-bold">Fire/Smoke Alarm</p>
+                <p className="text-[10px] text-slate-400 font-code-spec">3kHz Tone Spikes</p>
+              </div>
+              <span className="material-symbols-outlined text-[18px] text-rose-400">
+                notifications_active
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleSimulateTargetEvent('water')}
+              className={`p-2.5 rounded-xl border text-left flex items-center justify-between transition-all active:scale-95 ${
+                latestMlAnalysis.detected_event === 'Continuous Running Water / Leak'
+                  ? 'bg-amber-500/20 border-amber-500 text-amber-300 font-bold'
+                  : isLight
+                  ? 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-700'
+                  : 'bg-[#0a0d14] hover:bg-slate-900 border-slate-800 text-slate-300'
+              }`}
+            >
+              <div>
+                <p className="text-xs font-bold">Water Pipe Leak</p>
+                <p className="text-[10px] text-slate-400 font-code-spec">Continuous Drip/Flow</p>
+              </div>
+              <span className="material-symbols-outlined text-[18px] text-cyan-400">
+                water_drop
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleSimulateTargetEvent('appliance')}
+              className={`p-2.5 rounded-xl border text-left flex items-center justify-between transition-all active:scale-95 ${
+                latestMlAnalysis.detected_event === 'High Appliance Vibrations / Rattling'
+                  ? 'bg-amber-500/20 border-amber-500 text-amber-300 font-bold'
+                  : isLight
+                  ? 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-700'
+                  : 'bg-[#0a0d14] hover:bg-slate-900 border-slate-800 text-slate-300'
+              }`}
+            >
+              <div>
+                <p className="text-xs font-bold">Appliance Strain</p>
+                <p className="text-[10px] text-slate-400 font-code-spec">Compressor Rattle</p>
+              </div>
+              <span className="material-symbols-outlined text-[18px] text-amber-400">
+                precision_manufacturing
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleSimulateTargetEvent('ambient')}
+              className={`p-2.5 rounded-xl border text-left flex items-center justify-between transition-all active:scale-95 ${
+                latestMlAnalysis.detected_event === 'Ambient / Quiet'
+                  ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300 font-bold'
+                  : isLight
+                  ? 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-700'
+                  : 'bg-[#0a0d14] hover:bg-slate-900 border-slate-800 text-slate-300'
+              }`}
+            >
+              <div>
+                <p className="text-xs font-bold">Quiet Ambient</p>
+                <p className="text-[10px] text-slate-400 font-code-spec">&lt;0.01 RMS Silence</p>
+              </div>
+              <span className="material-symbols-outlined text-[18px] text-emerald-400">
+                spa
+              </span>
+            </button>
           </div>
         </div>
       </div>

@@ -305,6 +305,90 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           </button>
         </div>
       </section>
+ 
+      {/* On-Device AI Vision & Optical OCR Engine */}
+      <section
+        className={`rounded-3xl p-5 border shadow-2xl space-y-3.5 transition-all ${
+          isLight
+            ? 'bg-white border-slate-200 text-slate-900 shadow-sm'
+            : 'bg-[#0f141f] border-slate-800/90 text-slate-100'
+        }`}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+              isLight ? 'bg-cyan-100 text-cyan-700' : 'bg-cyan-500/20 text-cyan-400'
+            }`}>
+              <span className="material-symbols-outlined text-[18px]">document_scanner</span>
+            </div>
+            <div>
+              <h3 className="font-bold text-base">On-Device BEE Vision Engine</h3>
+              <p className="text-xs text-slate-400">
+                Offline optical character & star rating analyzer
+              </p>
+            </div>
+          </div>
+
+          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold font-code-spec flex items-center gap-1 ${
+            isLight ? 'bg-emerald-100 text-emerald-800' : 'bg-emerald-500/20 text-emerald-400'
+          }`}>
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+            100% Independent (No API Key)
+          </span>
+        </div>
+
+        <div className="p-3.5 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex flex-col gap-1.5">
+          <div className="flex items-center gap-2 text-cyan-400 text-xs font-bold">
+            <span className="material-symbols-outlined text-[16px]">verified</span>
+            <span>Google ML Kit & Computer Vision Active</span>
+          </div>
+          <p className="text-[11px] text-slate-400 leading-relaxed">
+            Extracts exact star ratings, appliance capacity (Litres, Tons, kg), and annual electricity consumption (kWh/year) directly on your device with 0 margin of error. No external API keys or internet connection required.
+          </p>
+        </div>
+      </section>
+
+      {/* On-Device Audio Analyzer & ML Pipeline Card */}
+      <section
+        className={`rounded-3xl p-5 border shadow-2xl space-y-3.5 transition-all ${
+          isLight
+            ? 'bg-white border-slate-200 text-slate-900 shadow-sm'
+            : 'bg-[#0f141f] border-slate-800/90 text-slate-100'
+        }`}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+              isLight ? 'bg-cyan-100 text-cyan-700' : 'bg-cyan-500/20 text-cyan-400'
+            }`}>
+              <span className="material-symbols-outlined text-[18px]">graphic_eq</span>
+            </div>
+            <div>
+              <h3 className="font-bold text-base">On-Device Audio ML Pipeline</h3>
+              <p className="text-xs text-slate-400">
+                HomeSense AudioSet &amp; High-Frequency Spectral Classifier
+              </p>
+            </div>
+          </div>
+
+          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold font-code-spec flex items-center gap-1 ${
+            isLight ? 'bg-emerald-100 text-emerald-800' : 'bg-emerald-500/20 text-emerald-400'
+          }`}>
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+            100% Offline Edge ML
+          </span>
+        </div>
+
+        <div className="p-3.5 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex flex-col gap-1.5">
+          <div className="flex items-center gap-2 text-cyan-400 text-xs font-bold">
+            <span className="material-symbols-outlined text-[16px]">verified</span>
+            <span>YAMNet ONNX &amp; Spectral Heuristics Active</span>
+          </div>
+          <p className="text-[11px] text-slate-400 leading-relaxed">
+            Real-time classification for smoke/fire alarm beeps (3kHz high-frequency spikes), continuous running water leaks, and high appliance vibration/mechanical strain. Fully integrated with Invincibles Workstation Link.
+          </p>
+        </div>
+      </section>
 
       {/* Property & Multi-Site Selector */}
       <section

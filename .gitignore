@@ -1,8 +1,44 @@
 node_modules/
-build/
 dist/
+build/
 coverage/
+
+# Android & Gradle Artifacts
+.gradle/
+android/app/build/
+android/capacitor-cordova-android-plugins/build/
+local.properties
+*.iml
+.idea/
+android/.idea/
+android/.gradle/
+captures/
+.navigation/
+
+# Compiled Binaries
+*.apk
+*.aab
+*.idsig
+
+# Python Cache & Environments
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.env
+.venv
+env/
+venv/
+
+# Temporary / Duplicates / Extraction Folders
+_backup_native_compose/
+extracted_homesenseai/
+homesenseai.zip
+homrsense_ai (1).py
+
+# OS & Logs
 .DS_Store
+Thumbs.db
 *.log
 .env*
 !.env.example

@@ -43,6 +43,15 @@ export const OfficeKitModal: React.FC<OfficeKitModalProps> = ({
       systemEfficiencyScore: 0.84,
       beeMatrixSyncConfidence: 0.984,
     },
+    audioMlPipeline: {
+      engine: 'HomeSenseAudioAnalyzer (homesenseai.zip)',
+      officeKitReady: true,
+      lastDetectedEvent: 'Ambient / Quiet (Nominal Baseline)',
+      alertLevel: 'NORMAL',
+      rmsEnergy: 0.0084,
+      confidence: 0.95,
+      recommendation: 'Smart Living acoustic telemetry active across workstation mesh.',
+    },
   };
 
   const handleCopyClipboard = async () => {
@@ -213,10 +222,11 @@ export const OfficeKitModal: React.FC<OfficeKitModalProps> = ({
                 <pre className={`text-[11px] overflow-x-auto whitespace-pre-wrap leading-relaxed ${
                   isLight ? 'text-slate-800' : 'text-slate-300'
                 }`}>
-                  {`[HomeSense Audit Summary]
+                  {`[HomeSense Audit & Acoustic Summary]
 Node: Skyline Node #042
 Team: Invincibles
 Acoustic Vibration: 0.01G (Nominal)
+Audio ML Engine: HomeSenseAudioAnalyzer (Office Kit Ready)
 BEE Status: 100% Certified On-Device`}
                 </pre>
               </div>

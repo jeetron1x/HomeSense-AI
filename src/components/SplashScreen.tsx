@@ -53,15 +53,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ theme, onFinish }) =
       }`}
       aria-label="HomeSense AI Splash Screen"
     >
-      {/* Top Mobile Status Bar */}
-      <div className="w-full max-w-sm px-7 pt-4 flex items-center justify-between font-code-spec text-xs opacity-70">
-        <span className="font-semibold tracking-tight">9:41</span>
-        <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-[15px]">signal_cellular_alt</span>
-          <span className="material-symbols-outlined text-[15px]">wifi</span>
-          <span className="material-symbols-outlined text-[15px]">battery_charging_full</span>
-        </div>
-      </div>
+      <div className="w-full pt-safe" />
 
       {/* Center Brand Identity with smooth motion & micro-interaction */}
       <div className="flex flex-col items-center justify-center -mt-6 px-6">

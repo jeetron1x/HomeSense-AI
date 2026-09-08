@@ -17,7 +17,7 @@ export const HomeSenseLogo: React.FC<HomeSenseLogoProps> = ({
   onClick,
   title,
 }) => {
-  // SVG Icon representing House + Phone + NPU Chip + Wifi + Eco Leaf
+  // SVG Icon matching HomeSense AI Logo (House + Phone + Wi-Fi + NPU Chip + Eco Leaf)
   const renderIcon = (iconSize: number = 28) => (
     <svg
       width={iconSize}
@@ -25,125 +25,144 @@ export const HomeSenseLogo: React.FC<HomeSenseLogoProps> = ({
       viewBox="0 0 120 120"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={`shrink-0 transition-all duration-300 ${animated ? 'drop-shadow-[0_0_16px_rgba(0,242,254,0.4)]' : ''}`}
+      className={`shrink-0 transition-all duration-300 ${animated ? 'drop-shadow-[0_0_20px_rgba(56,189,248,0.5)]' : ''}`}
     >
       <defs>
-        {/* Glow & Gradients */}
-        <linearGradient id="roofGrad" x1="15" y1="15" x2="105" y2="70" gradientUnits="userSpaceOnUse">
+        {/* Blue Gradient for House Shell */}
+        <linearGradient id="houseGlowGrad" x1="20" y1="14" x2="100" y2="94" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor="#38bdf8" />
-          <stop offset="50%" stopColor="#2563eb" />
+          <stop offset="40%" stopColor="#2563eb" />
           <stop offset="100%" stopColor="#1d4ed8" />
         </linearGradient>
 
-        <linearGradient id="phoneBorder" x1="38" y1="36" x2="82" y2="92" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#f8fafc" />
-          <stop offset="50%" stopColor="#cbd5e1" />
-          <stop offset="100%" stopColor="#64748b" />
+        {/* Phone Frame Border */}
+        <linearGradient id="phoneFrameGrad" x1="40" y1="32" x2="80" y2="88" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#ffffff" />
+          <stop offset="100%" stopColor="#f1f5f9" />
         </linearGradient>
 
-        <linearGradient id="wifiGrad" x1="45" y1="46" x2="75" y2="58" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#00f2fe" />
-          <stop offset="100%" stopColor="#38bdf8" />
+        {/* Wi-Fi Waves Gradient */}
+        <linearGradient id="wifiWavesGrad" x1="45" y1="44" x2="75" y2="56" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#38bdf8" />
+          <stop offset="100%" stopColor="#2563eb" />
         </linearGradient>
 
-        <linearGradient id="chipGrad" x1="48" y1="68" x2="72" y2="88" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#c084fc" />
-          <stop offset="50%" stopColor="#8b5cf6" />
-          <stop offset="100%" stopColor="#6366f1" />
+        {/* NPU Chip Gradient */}
+        <linearGradient id="npuChipGrad" x1="48" y1="64" x2="72" y2="84" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#a855f7" />
+          <stop offset="50%" stopColor="#7c3aed" />
+          <stop offset="100%" stopColor="#4f46e5" />
         </linearGradient>
 
-        <linearGradient id="leafGrad" x1="82" y1="70" x2="108" y2="100" gradientUnits="userSpaceOnUse">
+        {/* Leaf Gradient */}
+        <linearGradient id="leafGrad" x1="76" y1="56" x2="102" y2="92" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor="#34d399" />
+          <stop offset="50%" stopColor="#10b981" />
           <stop offset="100%" stopColor="#059669" />
         </linearGradient>
 
-        <filter id="logoGlow" x="-20%" y="-20%" width="140%" height="140%">
-          <feGaussianBlur stdDeviation="2" result="glow" />
+        {/* Soft Glow */}
+        <filter id="houseFilter" x="-15%" y="-15%" width="130%" height="130%">
+          <feGaussianBlur stdDeviation="2" result="blur" />
           <feMerge>
-            <feMergeNode in="glow" />
+            <feMergeNode in="blur" />
             <feMergeNode in="SourceGraphic" />
           </feMerge>
         </filter>
       </defs>
 
-      {/* House Outline with Chimney */}
-      {/* Chimney */}
+      {/* Chimney on roof right */}
       <path
-        d="M82 26V40H92V36L82 26Z"
-        fill="url(#roofGrad)"
-        opacity="0.9"
-      />
-      {/* Roof & Walls Contour */}
-      <path
-        d="M60 12L20 44V88C20 92.4 23.6 96 28 96H44V88H30V48L60 22L90 48V62H98V44L60 12Z"
-        fill="url(#roofGrad)"
-        filter="url(#logoGlow)"
+        d="M80 26V36H88V30.5L80 26Z"
+        fill="url(#houseGlowGrad)"
       />
 
-      {/* Smartphone Frame Inside House */}
+      {/* House Frame Contour */}
+      <path
+        d="M60 12L20 45V84C20 89.5 24.5 94 30 94H42V88H30C27.8 88 26 86.2 26 84V47.5L60 19.5L94 47.5V64H100V45L60 12Z"
+        fill="url(#houseGlowGrad)"
+        filter="url(#houseFilter)"
+      />
+
+      {/* Smartphone Frame in Center */}
       <rect
-        x="42"
-        y="36"
-        width="36"
-        height="56"
-        rx="7"
-        fill="#0b0e14"
-        stroke="url(#phoneBorder)"
-        strokeWidth="3"
+        x="41"
+        y="32"
+        width="38"
+        height="58"
+        rx="8"
+        fill="#0a0d14"
+        stroke="url(#phoneFrameGrad)"
+        strokeWidth="3.2"
       />
-      {/* Speaker Bar on top of phone */}
-      <line x1="56" y1="41" x2="64" y2="41" stroke="#94a3b8" strokeWidth="1.5" strokeLinecap="round" />
 
-      {/* Wi-Fi Radiation Waves */}
+      {/* Speaker Bar at Top of Phone */}
+      <line x1="55" y1="37" x2="65" y2="37" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" />
+
+      {/* Wi-Fi Waves */}
       <path
-        d="M49 53C52.5 49.5 67.5 49.5 71 53"
-        stroke="url(#wifiGrad)"
-        strokeWidth="2.5"
+        d="M48 50C52.5 45.5 67.5 45.5 72 50"
+        stroke="url(#wifiWavesGrad)"
+        strokeWidth="2.8"
         strokeLinecap="round"
       />
       <path
-        d="M53 58C56 55.5 64 55.5 67 58"
-        stroke="url(#wifiGrad)"
+        d="M52 55C55 52.5 65 52.5 68 55"
+        stroke="url(#wifiWavesGrad)"
+        strokeWidth="2.4"
+        strokeLinecap="round"
+      />
+      <path
+        d="M56 60C58 58.5 62 58.5 64 60"
+        stroke="url(#wifiWavesGrad)"
         strokeWidth="2"
         strokeLinecap="round"
       />
-      <circle cx="60" cy="62" r="1.5" fill="#00f2fe" />
 
-      {/* NPU Processor Chip with pins */}
-      {/* Pins */}
-      <line x1="53" y1="70" x2="53" y2="67" stroke="#a855f7" strokeWidth="1.2" />
-      <line x1="60" y1="70" x2="60" y2="67" stroke="#a855f7" strokeWidth="1.2" />
-      <line x1="67" y1="70" x2="67" y2="67" stroke="#a855f7" strokeWidth="1.2" />
-      <line x1="53" y1="84" x2="53" y2="87" stroke="#a855f7" strokeWidth="1.2" />
-      <line x1="60" y1="84" x2="60" y2="87" stroke="#a855f7" strokeWidth="1.2" />
-      <line x1="67" y1="84" x2="67" y2="87" stroke="#a855f7" strokeWidth="1.2" />
-      <line x1="47" y1="74" x2="50" y2="74" stroke="#a855f7" strokeWidth="1.2" />
-      <line x1="47" y1="80" x2="50" y2="80" stroke="#a855f7" strokeWidth="1.2" />
-      <line x1="70" y1="74" x2="73" y2="74" stroke="#a855f7" strokeWidth="1.2" />
-      <line x1="70" y1="80" x2="73" y2="80" stroke="#a855f7" strokeWidth="1.2" />
+      {/* NPU Processor Chip */}
+      {/* Pins Top */}
+      <line x1="54" y1="67" x2="54" y2="69" stroke="#c084fc" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="60" y1="67" x2="60" y2="69" stroke="#c084fc" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="66" y1="67" x2="66" y2="69" stroke="#c084fc" strokeWidth="1.5" strokeLinecap="round" />
+      {/* Pins Bottom */}
+      <line x1="54" y1="81" x2="54" y2="83" stroke="#c084fc" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="60" y1="81" x2="60" y2="83" stroke="#c084fc" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="66" y1="81" x2="66" y2="83" stroke="#c084fc" strokeWidth="1.5" strokeLinecap="round" />
+      {/* Pins Left */}
+      <line x1="47" y1="72" x2="49" y2="72" stroke="#c084fc" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="47" y1="78" x2="49" y2="78" stroke="#c084fc" strokeWidth="1.5" strokeLinecap="round" />
+      {/* Pins Right */}
+      <line x1="71" y1="72" x2="73" y2="72" stroke="#c084fc" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="71" y1="78" x2="73" y2="78" stroke="#c084fc" strokeWidth="1.5" strokeLinecap="round" />
 
-      {/* Chip Core */}
+      {/* Chip Body */}
       <rect
-        x="50"
-        y="70"
-        width="20"
-        height="14"
+        x="49"
+        y="69"
+        width="22"
+        height="12"
         rx="2.5"
-        fill="url(#chipGrad)"
+        fill="url(#npuChipGrad)"
         stroke="#e9d5ff"
-        strokeWidth="0.75"
+        strokeWidth="0.8"
       />
-      {/* Inner Chip Core Pattern */}
-      <rect x="54" y="73" width="12" height="8" rx="1.5" fill="#3b0764" />
+      <rect
+        x="53"
+        y="72"
+        width="14"
+        height="6"
+        rx="1.5"
+        fill="#2e1065"
+      />
 
-      {/* Eco Leaf Graphic on right */}
+      {/* Eco Leaf on Bottom-Right */}
       <path
-        d="M84 94C84 94 81 74 98 64C108 82 98 94 84 94Z"
+        d="M78 92C78 92 76 68 98 55C108 77 96 92 78 92Z"
         fill="url(#leafGrad)"
-        filter="url(#logoGlow)"
+        filter="url(#houseFilter)"
       />
       <path
-        d="M86 91C91 85 96 76 98 64"
+        d="M80 89C86 82 92 72 98 55"
         stroke="#a7f3d0"
         strokeWidth="1.2"
         strokeLinecap="round"
@@ -181,10 +200,10 @@ export const HomeSenseLogo: React.FC<HomeSenseLogoProps> = ({
         </div>
         <div className="flex flex-col select-none leading-none">
           <div className="flex items-baseline gap-0.5">
-            <span className="font-bold text-[13px] tracking-tight font-headline-sm">HomeSense</span>
-            <span className="font-extrabold text-[13px] bg-gradient-to-r from-[#00f2fe] to-[#38bdf8] bg-clip-text text-transparent">AI</span>
+            <span className="font-bold text-[13px] tracking-tight text-white font-headline-sm">HomeSense</span>
+            <span className="font-extrabold text-[13px] bg-gradient-to-r from-[#00f2fe] via-[#38bdf8] to-[#6366f1] bg-clip-text text-transparent">AI</span>
           </div>
-          <span className="text-[8px] font-semibold text-slate-400 tracking-[0.14em] uppercase mt-0.5 font-code-spec">LOCALLY.</span>
+          <span className="text-[8px] font-semibold text-slate-400 tracking-[0.16em] uppercase mt-0.5 font-code-spec">LOCALLY.</span>
         </div>
       </div>
     );
@@ -192,12 +211,12 @@ export const HomeSenseLogo: React.FC<HomeSenseLogoProps> = ({
 
   if (variant === 'badge') {
     return wrapClickable(
-      <div className={`inline-flex items-center gap-2.5 px-3 py-1.5 rounded-2xl bg-[#1d2028]/80 backdrop-blur-xl border border-white/10 shadow-lg ${className}`}>
+      <div className={`inline-flex items-center gap-2.5 px-3 py-1.5 rounded-2xl bg-[#0b0e14]/90 backdrop-blur-xl border border-white/10 shadow-lg ${className}`}>
         {renderIcon(size)}
         <div className="flex flex-col text-left leading-none">
           <div className="flex items-baseline gap-0.5">
             <span className="font-bold text-[14px] tracking-tight text-white">HomeSense</span>
-            <span className="font-extrabold text-[14px] bg-gradient-to-r from-[#00f2fe] to-[#38bdf8] bg-clip-text text-transparent">AI</span>
+            <span className="font-extrabold text-[14px] bg-gradient-to-r from-[#00f2fe] via-[#38bdf8] to-[#6366f1] bg-clip-text text-transparent">AI</span>
           </div>
           <span className="text-[8px] font-semibold text-cyan-400/90 tracking-widest uppercase mt-0.5">ON-DEVICE NPU</span>
         </div>
@@ -205,17 +224,17 @@ export const HomeSenseLogo: React.FC<HomeSenseLogoProps> = ({
     );
   }
 
-  // Full Brand Display
+  // Full Brand Display (Logo + HomeSense AI + Subtext "SMARTER HOMES. LOCALLY.")
   return wrapClickable(
     <div className={`flex flex-col items-center text-center select-none ${className}`}>
-      <div className="relative p-2 rounded-3xl bg-surface-container-lowest/5 backdrop-blur-xl border border-white/10 shadow-[0_0_32px_rgba(0,242,254,0.15)] mb-2">
-        {renderIcon(size || 64)}
+      <div className="relative p-2 rounded-3xl bg-[#0a0d14]/80 backdrop-blur-xl border border-white/10 shadow-[0_0_32px_rgba(56,189,248,0.2)] mb-3">
+        {renderIcon(size || 72)}
       </div>
-      <div className="flex items-center justify-center gap-1">
-        <span className="text-2xl sm:text-3xl font-bold tracking-tight">HomeSense</span>
-        <span className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-[#00f2fe] via-[#38bdf8] to-[#2563eb] bg-clip-text text-transparent">AI</span>
+      <div className="flex items-center justify-center gap-1.5">
+        <span className="text-2xl sm:text-3xl font-bold tracking-tight text-white">HomeSense</span>
+        <span className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-[#38bdf8] via-[#60a5fa] to-[#818cf8] bg-clip-text text-transparent">AI</span>
       </div>
-      <span className="text-[11px] font-medium text-slate-400 tracking-[0.2em] uppercase mt-1">
+      <span className="text-[10px] sm:text-[11px] font-semibold text-slate-400 tracking-[0.25em] uppercase mt-1.5">
         SMARTER HOMES. LOCALLY.
       </span>
     </div>

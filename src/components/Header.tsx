@@ -37,20 +37,6 @@ export const Header: React.FC<HeaderProps> = ({
           : 'bg-[#080b11]/95 border-slate-800/80 text-slate-100 shadow-[0_4px_24px_rgba(0,0,0,0.8)]'
       }`}
     >
-      {/* Top Mobile Status Bar */}
-      <div className={`h-6 px-4 flex items-center justify-between font-code-spec text-[11px] select-none ${
-        isLight ? 'text-slate-500' : 'text-slate-400'
-      }`}>
-        <span className={`font-semibold tracking-tight ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
-          9:41
-        </span>
-        <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-[13px]">signal_cellular_alt</span>
-          <span className="material-symbols-outlined text-[13px]">wifi</span>
-          <span className="material-symbols-outlined text-[13px]">battery_charging_full</span>
-        </div>
-      </div>
-
       {/* Main Header Bar */}
       <div className="h-14 px-4 flex items-center justify-between gap-3">
         {/* Left: Brand or Screen Title with Clickable GitHub Logo */}
